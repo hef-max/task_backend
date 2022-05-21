@@ -1,5 +1,5 @@
-from flask import Flask, render_template, redirect, Blueprint, request, flash, url_for, Response
-from api import *
+from flask import Flask, render_template, redirect, Blueprint, request, flash, url_for, Response, session
+from model import *
 import io
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -12,15 +12,12 @@ from os import path
 import sqlite3
 from flask_login import LoginManager, UserMixin
 
-
 app = Flask(__name__, template_folder='templates')
-# model = Model()
 cuaca = Api()
 db = SQLAlchemy()
 DB_NAME = "database.db"
 views = Blueprint('views', __name__)
 auth = Blueprint('auth', __name__)
-name = []
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -67,7 +64,9 @@ def login():
                 with sqlite3.connect('database.db') as db:
                     cursor = db.cursor()
                     cursor.execute(f"SELECT first_name FROM `user` WHERE email='{email}';")
-                    # first_name = name.append(cursor.fetchall())
+                    first_name = cursor.fetchone()
+                    session['logged_in'] = True
+                    session['username'] = first_name[0]
                 flash('Logged in successfully!', category='success')
                 login_user(user, remember=True) 
                 return redirect(url_for('index'))
@@ -75,7 +74,6 @@ def login():
                 flash('Incorrect password, try again.', category='error')
         else:
             flash('Email does not exist.', category='error')
-
     return render_template("login.html", user=current_user)
 
 @auth.route('/sign-up', methods=['GET', 'POST'])
@@ -110,53 +108,69 @@ def sign_up():
 
 ######################## dashboard ###########################################
 
-plt.rcParams["figure.figsize"] = [7.50, 3.50]
+plt.rcParams["figure.figsize"] = [8.50, 4.50]
 plt.rcParams["figure.autolayout"] = True
-@app.route('/pie-plot')
-def pie_png():
-	fig = Figure()
-	axis = fig.add_subplot(1, 1, 1)
-	y = np.array([3, 8, 2, 8])
-	mylabels = ["Handphone", "Laptop", "Notebook", "Macbox"]
-	axis.pie(y, labels=mylabels)
-	output = io.BytesIO()
-	FigureCanvas(fig).print_png(output)
-	return Response(output.getvalue(), mimetype='image/png')
-
 @app.route('/print-plot')
 def plot_png():
-	fig = Figure()
-	axis = fig.add_subplot(1, 1, 1)
-	x = np.array(["Handphone", "Laptop", "Notebook", "Macbox"])
-	y = np.array([3, 8, 1, 8])
-	axis.bar(x,y)
-	output = io.BytesIO()
-	FigureCanvas(fig).print_png(output)
-	return Response(output.getvalue(), mimetype='image/png')
+    a = []
+    b = []
+    c = []
+    d = []
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        cursor.execute('SELECT nama_barang FROM `barang`;')
+        for nama_barang in cursor.fetchall():
+            print(nama_barang[0])
+            if nama_barang[0] == 'Handphone':
+                with sqlite3.connect('database.db') as db:
+                    cursor = db.cursor()
+                    cursor.execute('SELECT SUM(jumlah_barang) AS TotalItemsOrdered FROM barang WHERE nama_barang="Handphone";')
+                    jumlah_barang = cursor.fetchall()
+                    a.append(jumlah_barang[0])
+            if nama_barang[0] == 'Laptop':
+                with sqlite3.connect('database.db') as db:
+                    cursor = db.cursor()
+                    cursor.execute('SELECT SUM(jumlah_barang) AS TotalItemsOrdered FROM barang WHERE nama_barang="Laptop";')
+                    jumlah_barang = cursor.fetchall()
+                    b.append(jumlah_barang[0])
+            if nama_barang[0] == 'Noteboox':
+                with sqlite3.connect('database.db') as db:
+                    cursor = db.cursor()
+                    cursor.execute('SELECT SUM(jumlah_barang) AS TotalItemsOrdered FROM barang WHERE nama_barang="Noteboox";')
+                    jumlah_barang = cursor.fetchall()
+                    c.append(jumlah_barang[0])
+            if nama_barang[0] == 'Macbox':
+                with sqlite3.connect('database.db') as db:
+                    cursor = db.cursor()
+                    cursor.execute('SELECT SUM(jumlah_barang) AS TotalItemsOrdered FROM barang WHERE nama_barang="Macbox";')
+                    jumlah_barang = cursor.fetchall()
+                    d.append(jumlah_barang[0])
+    fig = Figure()
+    axis = fig.add_subplot(1, 1, 1)
+    x = np.array(["Handphone", "Laptop", "Notebook", "Macbox"])
+    y = np.array([a[0][0], b[0][0], c[0][0], d[0][0]])
+    axis.bar(x,y)
+    output = io.BytesIO()
+    FigureCanvas(fig).print_png(output)
+    return Response(output.getvalue(), mimetype='image/png')
 
 @app.route('/index', methods=['GET', 'POST'])
 @login_required
 def index():
-    # first_name = name[0][0][0]
-    items = {
-        "name": 'Widi Susanto'
-    }
-    return render_template('index.html', items=items,  user=current_user)
+    return render_template('index.html', user=current_user)
 
 @app.route('/profile')
 def myprofile():
-    # first_name = name[0][0][0]
-    items = {
-       "name": 'Widi Susanto'
-    }
-    return render_template('myprofile.html', items=items)
+    return render_template('myprofile.html')
 
 @app.route('/dashboard')
 def dashboard():
-    # first_name = name[0][0][0]
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        cursor.execute("SELECT * FROM barang;")
     items = {
-        "name": 'Widi Susanto',
-        "cuaca": cuaca.read()
+        "cuaca": cuaca.read(),
+        "data": cursor.fetchall()
     }
     return render_template('dashboard.html', items=items)
 
@@ -165,19 +179,14 @@ def orders():
     with sqlite3.connect('database.db') as db:
         cursor = db.cursor()
         cursor.execute("SELECT * FROM barang;")
-    # first_name = name[0][0][0]
     items = {
-        "name": 'Widi Susanto',
         "data": cursor.fetchall()
     }
     return render_template("orders.html", items=items)
 
 @app.route('/settings')
 def settings():
-    items = {
-       "name": 'Widi Susanto'
-    }
-    return render_template('settings.html', items=items)
+    return render_template('settings.html')
 
 @auth.route('/logout')
 @login_required
@@ -215,7 +224,7 @@ def update():
 
         with sqlite3.connect('database.db') as db:
             cursor = db.cursor()
-            cursor.execute(f"UPDATE barang SET kode_barang='{kode_barang}', nama_barang='{nama_barang}', jumlah_barang={jumlah_barang}, harga_barang={harga_barang};")
+            cursor.execute(f"UPDATE barang SET nama_barang='{nama_barang}', jumlah_barang={jumlah_barang}, harga_barang={harga_barang} WHERE kode_barang='{kode_barang}';")
         db.commit()
         flash("Employee Updated Successfully")
 
