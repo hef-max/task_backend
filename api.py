@@ -33,8 +33,10 @@ class Api():
         self.cuaca_api = JSON(f'https://ibnux.github.io/BMKG-importer/cuaca/{self.id[0]}.json')
         self.cuaca_json = self.cuaca_api.data
 
+        # print(self.cuaca_json)
+
         for i in self.cuaca_json:
-            if i['jamCuaca'] == '2022-05-21 06:00:00':
+            if i['jamCuaca'] == '2022-05-29 00:00:00':
                 self.jamCuaca.append(i['jamCuaca'])
                 self.kodeCuaca.append(i['kodeCuaca'])
                 self.cuaca.append(i['cuaca'])

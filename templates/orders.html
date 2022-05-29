@@ -87,7 +87,7 @@
                                           <label>Harga Barang</label>
                                           <input type="text" class="form-control" name="harga_barang" value="{{ row[4] }}">
                                        </div>
-
+													<br>
                                        <div class="form-group">
                                           <button class="btn btn-primary" type="submit">Update</button>
                                        </div>
@@ -131,7 +131,19 @@
 			               </div>
 			                <div class="form-group">
 			                  <label>Nama Barang</label>
-			                  <input type="text" class="form-control" name="nama_barang" required="1">
+			                  <ul>
+									  	<input type="checkbox" id="vehicle1" name="nama_barang" value="Handphone">
+									  	<label for="vehicle1">Handphone</label><br>
+
+										<input type="checkbox" id="vehicle2" name="nama_barang" value="Noteboox">
+									  	<label for="vehicle2">Noteboox</label><br>
+
+									  	<input type="checkbox" id="vehicle3" name="nama_barang" value="Laptop">
+									  	<label for="vehicle3">Laptop</label><br>
+									  	
+									  	<input type="checkbox" id="vehicle4" name="nama_barang" value="Macbox">
+									  	<label for="vehicle4">Macbox</label>
+									</ul>
 			               </div>
 
 			                <div class="form-group">
@@ -143,9 +155,9 @@
 			                  <label>Harga Barang</label>
 			                  <input type="text" class="form-control" name="harga_barang" required="1">
 			               </div>
-
+								<br>
 			               <div class="form-group">
-			                  <button class="btn btn-primary" type="submit">Add</button>
+			                  <button class="btn btn-primary" type="submit">Add Barang</button>
 			               </div>
 
 			            </form>
