@@ -260,7 +260,7 @@ def update():
 
         with sqlite3.connect('database.db') as db:
             cursor = db.cursor()
-            cursor.execute(f"UPDATE barang SET kode_barang='{kode_barang}', nama_barang='{nama_barang}', jumlah_barang={jumlah_barang}, harga_barang={harga_barang};")
+            cursor.execute(f"UPDATE barang SET nama_barang='{nama_barang}', jumlah_barang={jumlah_barang}, harga_barang={harga_barang} WHERE kode_barang='{kode_barang}';")
         db.commit()
         flash("Employee Updated Successfully")
 
