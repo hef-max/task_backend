@@ -80,40 +80,6 @@ def login():
     return render_template("login.html", user=current_user)
 
 
-@auth.route('/sign-up', methods=['GET', 'POST'])
-def sign_up():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        first_name = request.form.get('firstName')
-        password1 = request.form.get('password1')
-        password2 = request.form.get('password2')
-
-        user = user_class.query.filter_by(email=email).first()
-
-        if user:
-            flash('Email already exists.', category='error')
-        elif len(email) < 4:
-            flash('Email must be greater than 3 characters.', category='error')
-        elif len(first_name) < 2:
-            flash('First name must be greater than 1 character.', category='error')
-        elif password1 != password2:
-            flash('Passwords don\'t match.', category='error')
-        elif len(password1) < 8:
-            flash('Password must be at least 7 characters.', category='error')
-        else:
-            print("masuk else")
-            new_user = User(email=email, first_name=first_name, password=generate_password_hash(password1, method='sha256'))
-            db.session.add(new_user)
-            db.session.commit()
-            session['logged_in'] = True
-            session['username'] = first_name
-            login_user(new_user, remember=True)
-            flash('Account created!', category='success')
-            return redirect(url_for('myprofile'))
-
-    return render_template("sign_up.html", user=current_user)
-
-
 ######################## dashboard ###########################################
 
 plt.rcParams["figure.figsize"] = [7.50, 3.50]
@@ -173,8 +139,6 @@ def plot_png():
         n = [(0)]
         d.append(n)
 
-    print(a, b, c, d)
-
     fig = Figure()
     axis = fig.add_subplot(1, 1, 1)
     x = np.array(["Handphone", "Laptop", "Notebook", "Macbox"])
@@ -184,22 +148,18 @@ def plot_png():
     FigureCanvas(fig).print_png(output)
     return Response(output.getvalue(), mimetype='image/png')
 
-
-@app.route('/index', methods=['GET', 'POST'])
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
-def index():
-    return render_template('index.html',  user=current_user)
-
-@app.route('/profile')
 def myprofile():
     with sqlite3.connect('database.db') as db:
-        cursor = db.cursor()
+        cursor = db.cursor()        
         cursor.execute(f'SELECT * FROM user WHERE first_name="{name[0]}";')
         data = cursor.fetchall()
     items = {
-        "email": data[0][1]
+        "email": data[0][1],
+        "tgl_lahir": data[0][4]
     }
-    return render_template('myprofile.html', items=items)
+    return render_template('myprofile.html', items=items, user=current_user)
 
 @app.route('/dashboard')
 def dashboard():
