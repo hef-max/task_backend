@@ -24,18 +24,21 @@
 
 	      	<table class="table table-hover">
 	           <tr>
-	               <th>ID</th>
+	               <th>Nomor</th>
 	               <th>Kode Barang</th>
 	               <th>Nama Barang</th>
 	               <th>Jumlah Barang</th>
 	               <th>Harga Barang</th>
 	               <th>Action</th>
+	               <th>Detils</th>
 	           </tr>
 
 
                   {% for row in items['data'] %}
                    <tr>
-                     <td>{{ row[0] }}</td>
+                   	{% for x in range(0, 4)%}
+                     <td>{{ x }}</td>
+                     {% endfor %}
                      <td>{{ row[1] }}</td>
                      <td>{{ row[2] }}</td>
                      <td>{{ row[3] }}</td>
@@ -100,8 +103,10 @@
                         </div>
 
                         <a href="/hapus/{{ row[0] }}" onclick="return confirm('Yakin ingin hapus?')"><button class="btn btn-danger">Hapus</button></a>
-
                      </td>
+
+                     <td><a href="/detils/{{ row[0] }}"><button type="button" class="btn btn-primary">Detils</button></td>
+
                    </tr>
                  {% endfor %}
                  </tbody>

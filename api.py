@@ -36,7 +36,7 @@ class Api():
         # print(self.cuaca_json)
 
         for i in self.cuaca_json:
-            if i['jamCuaca'] == '2022-06-02 00:00:00':
+            if i['jamCuaca'] == '2022-06-06 00:00:00':
                 self.jamCuaca.append(i['jamCuaca'])
                 self.kodeCuaca.append(i['kodeCuaca'])
                 self.cuaca.append(i['cuaca'])

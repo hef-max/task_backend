@@ -178,9 +178,12 @@ def orders():
         cursor = db.cursor()
         cursor.execute("SELECT * FROM barang;")
     items = {
-        "data": cursor.fetchall()
+        "data": cursor.fetchall(),
     }
-    return render_template("orders.html", items=items)
+    panjang = []
+    for x in range(1, len(items['data'])):
+        panjang.append(x)
+    return render_template("orders.html", items=items, len=panjang)
 
 @auth.route('/logout')
 @login_required
@@ -233,6 +236,14 @@ def hapus(id_data):
         cursor.execute(f"DELETE FROM `barang` WHERE id={id_data};")
         db.commit()
     return redirect("/orders")
+
+@app.route("/detils/<string:id_data>", methods=['GET'])
+def detils(id_data):
+    with sqlite3.connect('database.db') as db:
+        cursor = db.cursor()
+        cursor.execute(f"SELECT * FROM `barang` WHERE id='{id_data}';")
+        data = cursor.fetchall()
+    return render_template("detils.html", items=data)
 
 if __name__ == '__main__':
 	create_app()
